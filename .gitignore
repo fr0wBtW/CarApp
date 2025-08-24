@@ -1,10 +1,29 @@
-# .NET
+# =====================
+# .NET / C# (CarApi)
+# =====================
 **/bin/
 **/obj/
 *.user
 *.suo
+*.vs/
+*.nupkg
+*.db
+appsettings.Development.json
 
-# Node / React
+# =====================
+# Node / React (CarClient)
+# =====================
 node_modules/
 dist/
+build/
 .env
+.env.local
+.env.*.local
+npm-debug.log*
+yarn-error.log*
+
+# =====================
+# OS
+# =====================
+.DS_Store
+Thumbs.db
