@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using CarApi.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace CarApi.Controllers
 {
@@ -22,15 +23,20 @@ namespace CarApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var cars = await _context.Cars.ToListAsync();
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var cars = await _context.Cars.Where(c => c.UserId == userId).ToListAsync();
             return Ok(cars);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var car = await _context.Cars.FindAsync(id);
-            if(car == null) return NotFound();
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var car = await _context.Cars.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+            if (car == null)
+            {
+                return NotFound();
+            }
             return Ok(car);
         }
 
@@ -44,6 +50,8 @@ namespace CarApi.Controllers
                 Year = carDto.Year
             };
 
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            car.UserId = userId;
             _context.Cars.Add(car);
             await _context.SaveChangesAsync();
 
@@ -53,8 +61,12 @@ namespace CarApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] CarUpdateDto carDto)
         {
-            var car = await _context.Cars.FindAsync(id);
-            if(car == null) return NotFound();
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var car = await _context.Cars.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+            if (car == null)
+            {
+                return NotFound();
+            }
 
             car.Make = carDto.Make;
             car.Model = carDto.Model;
@@ -67,8 +79,12 @@ namespace CarApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var car = await _context.Cars.FindAsync(id);
-            if (car == null) return NotFound();
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var car = await _context.Cars.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+            if (car == null)
+            {
+                return NotFound();
+            }
 
             _context.Cars.Remove(car);
             await _context.SaveChangesAsync();
